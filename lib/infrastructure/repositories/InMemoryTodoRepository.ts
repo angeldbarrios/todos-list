@@ -15,17 +15,6 @@ export default class InMemoryTodoRepository implements ITodoRepository {
     }
   }
 
-  private reIndexData() {
-    this.todosIdIndex = this.todosList.reduce((acc, todoItem) => {
-      const key = todoItem.id;
-      if (acc[key]) {
-        throw new Error('Duplicate id');
-      }
-      acc[key] = todoItem;
-      return acc;
-    }, {});
-  }
-
   private indexNewTodoItem(item: any) {
     if (this.todosIdIndex[item.id]) {
       throw new Error('Id already exists');
@@ -47,7 +36,7 @@ export default class InMemoryTodoRepository implements ITodoRepository {
         order = 'desc';
         paginationParams.sort = paginationParams.sort.substring(1);
       }
-      
+
       if (this.sortableProperties.indexOf(paginationParams.sort) === -1) {
         const error = new Error('Invalid sort field');
         error.name = 'BAD_DATA';
@@ -129,16 +118,5 @@ export default class InMemoryTodoRepository implements ITodoRepository {
       this.todosList.splice(index, 1);
     }
     delete this.todosIdIndex[todoId];
-  }
-
-  async getTodoById(todoId: number): Promise<any> {
-    const todo = this.todosIdIndex[todoId];
-    if (!todo) {
-      const error = new Error('Id not found');
-      error.name = 'NOT_FOUND';
-      throw error;
-    }
-
-    return todo;
   }
 }
