@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "outDir": "./build",
+    "sourceMap": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./lib/types"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "pretty": true,
+    "allowJs": true,
+    "noEmit": false,
+    "esModuleInterop": true
+  },
+  "include": [
+    "./index.ts",
+    "./lib"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests",
+    "lib/**/*.spec.ts",
+    ".vscode",
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "watch": [
+    "index.ts",
+    "lib",
+    ".env"
+  ],
+  "ext": "js,ts,json",
+  "ignore": [
+    "lib/**/*.spec.ts",
+    "lib/**/*.spec.js",
+    "tests"
+  ],
+  "exec": "ts-node  --transpile-only ./index.ts"
+}
