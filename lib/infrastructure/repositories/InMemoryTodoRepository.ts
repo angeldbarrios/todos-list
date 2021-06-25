@@ -2,11 +2,11 @@ import ITodoRepository from '../../domain/repositories/ITodoRepository';
 import { PaginationParams } from '../../domain/types';
 
 export default class InMemoryTodoRepository implements ITodoRepository {
-  todosList: Array<any> = [];
-  todosIdIndex: object = {};
-  sequence: number = 1;
-  editableProperties = ['name'];
-  sortableProperties = ['name', 'created_at', 'updated_at', 'checked']
+  private todosList: Array<any> = [];
+  private todosIdIndex: object = {};
+  private sequence: number = 1;
+  private editableProperties = ['name'];
+  private sortableProperties = ['name', 'created_at', 'updated_at', 'checked']
 
   constructor() {
     for (let i = 0; i < 1; i++) {
