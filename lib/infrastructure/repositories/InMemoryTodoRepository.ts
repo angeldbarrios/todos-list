@@ -6,10 +6,10 @@ export default class InMemoryTodoRepository implements ITodoRepository {
   todosIdIndex: object = {};
   sequence: number = 1;
   editableProperties = ['name'];
-  sortableProperties = ['created_at','updated_at', 'checked']
+  sortableProperties = ['name', 'created_at', 'updated_at', 'checked']
 
   constructor() {
-    for (let i = 0; i < 103; i++) {
+    for (let i = 0; i < 1; i++) {
       const exampleTodo = { name: 'Example TODO ' + i };
       this.createTodo(exampleTodo);
     }
@@ -38,11 +38,48 @@ export default class InMemoryTodoRepository implements ITodoRepository {
   }
 
   async getTodos(paginationParams: PaginationParams): Promise<any> {
-    const from = (Number(paginationParams.page) - 1) * 10;
-    const idIndexKeys = Object.keys(this.todosIdIndex).slice(from, from + 10);
-    return idIndexKeys.map((key) => {
-      return this.todosIdIndex[key];
-    });
+    // TODO: support index for sorting
+    if (paginationParams.sort !== undefined) {
+      // Descending order
+      let order = 'asc';
+
+      if (paginationParams.sort[0] === '-') {
+        order = 'desc';
+        paginationParams.sort = paginationParams.sort.substring(1);
+      }
+      
+      if (this.sortableProperties.indexOf(paginationParams.sort) === -1) {
+        const error = new Error('Invalid sort field');
+        error.name = 'BAD_DATA';
+        throw error;
+      }
+
+      const results = [...this.todosList].sort(function (a, b) {
+        let valueA = typeof a[paginationParams.sort] === 'boolean' 
+          ? a[paginationParams.sort].toString() 
+          : a[paginationParams.sort];
+
+        let valueB = typeof b[paginationParams.sort] === 'boolean' 
+          ? b[paginationParams.sort].toString() 
+          : b[paginationParams.sort];
+  
+        if(order === 'asc') {
+          return valueA > valueB ? 1: -1;
+        } else {
+          return valueA < valueB ? 1: -1;
+        }
+      });
+
+      const from = (Number(paginationParams.page) - 1) * 10;
+      return results.slice().slice(from, from + 10);;
+
+    } else {
+      const from = (Number(paginationParams.page) - 1) * 10;
+      const idIndexKeys = Object.keys(this.todosIdIndex).slice(from, from + 10);
+      return idIndexKeys.map((key) => {
+        return this.todosIdIndex[key];
+      });
+    }
   }
 
   async createTodo(data: any): Promise<any> {
@@ -101,7 +138,7 @@ export default class InMemoryTodoRepository implements ITodoRepository {
       error.name = 'NOT_FOUND';
       throw error;
     }
-    
+
     return todo;
   }
 }

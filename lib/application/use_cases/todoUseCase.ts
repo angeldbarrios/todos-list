@@ -9,7 +9,7 @@ const todoSchemaMap = {
 
 const paginationSchema = Joi.object({
   page: Joi.number().default(1),
-  sort: Joi.string().max(20).alphanum()
+  sort: Joi.string().max(20).regex(/^[A-Za-z0-9-]+$/)
 });
 
 export default class TodoUseCases {
