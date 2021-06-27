@@ -151,8 +151,8 @@ describe('InMemoryTodoRepository', function () {
     describe('sorting', function () {
 
       [
-        { prop: 'checked' },
         { prop: 'name' },
+        { prop: 'checked' },
         { prop: 'created_at' },
         { prop: 'updated_at' }
       ].forEach(conf => {
@@ -176,7 +176,7 @@ describe('InMemoryTodoRepository', function () {
                 return -1;
               }
 
-              return a[conf.prop].toString() > b[conf.prop].toString() ? 1 : -1;
+              return a[conf.prop] > b[conf.prop] ? 1 : -1;
             });
           });
 
