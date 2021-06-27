@@ -10,7 +10,7 @@ describe('TODO use cases', function () {
   let appContext: AppContext;
   let todoUseCases: TodoUseCases;
 
-  beforeEach(function () {
+  before(function () {
     appContext = {
       repositories: {
         todoRepository: {
