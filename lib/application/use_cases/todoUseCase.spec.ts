@@ -17,8 +17,7 @@ describe('TODO use cases', function () {
           getTodos: async function() {},
           createTodo: async function() {},
           editTodo: async function() {},
-          deleteTodo: async function() {},
-          getTodoById: async function() {},
+          deleteTodo: async function() {}
         }
       }
     };
@@ -77,6 +76,26 @@ describe('TODO use cases', function () {
       expect(editTodoStub.callCount).to.be.eq(0);
     });
 
+    it('should fail if data.checked is not of type boolean', async function () {
+      const promise = todoUseCases.editTodo(1, { name: 'John Doe', checked: 'not_boolean' });
+      await expect(promise).to.be.rejected;
+      expect(editTodoStub.callCount).to.be.eq(0);
+    });
+    
+    it('should pass if data.checked property is boolean', async function () {
+      const promise = todoUseCases.editTodo(1, { name: 'John Doe', checked: true });        
+      await expect(promise).to.be.fulfilled;
+      expect(editTodoStub.callCount).to.be.eq(1);
+      expect(editTodoStub.getCall(0).args).to.be.eql([1, { name: 'John Doe', checked: true }]);
+    });
+
+    it('should pass if data.checked is the only property', async function () {
+      const promise = todoUseCases.editTodo(1, { checked: true });        
+      await expect(promise).to.be.fulfilled;
+      expect(editTodoStub.callCount).to.be.eq(1);
+      expect(editTodoStub.getCall(0).args).to.be.eql([1, { checked: true }]);
+    });
+
     [
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx'.repeat(2),
       'I have to study for math exam'
@@ -88,6 +107,7 @@ describe('TODO use cases', function () {
         expect(editTodoStub.getCall(0).args).to.be.eql([1, { name: todoName }]);
       });
     });
+
   });
 
   describe('DELETE TODOS', function () {

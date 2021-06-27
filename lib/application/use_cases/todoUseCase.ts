@@ -4,7 +4,8 @@ import Joi from 'joi';
 
 const todoSchemaMap = {
   id: Joi.number(),
-  name: Joi.string().min(5).max(100) // TODO: Keep an eye on XSS
+  name: Joi.string().min(5).max(100), // TODO: Keep an eye on XSS
+  checked: Joi.boolean()
 };
 
 const paginationSchema = Joi.object({
@@ -18,8 +19,8 @@ export default class TodoUseCases {
     this.todoRepository = appContext.repositories.todoRepository;
   }
  
+  // TODO: implement validation with decorators
   private validate(schema: Joi.Schema, data: any) {
-    // TODO: implement validation with decorators
     const { value, error } = schema.validate(data);
     if (error) { 
       const badDataError = new Error('Bad data');
@@ -36,7 +37,7 @@ export default class TodoUseCases {
     return todos;
   }
 
-  async createTodo(data: any): Promise<any> {0
+  async createTodo(data: any): Promise<any> {
     const schema = Joi.object({ name: todoSchemaMap.name })
       .fork(['name'], (schema) => schema.required());
     data = this.validate(schema, data);
@@ -45,8 +46,9 @@ export default class TodoUseCases {
   }
 
   async editTodo(todoId: number | string, data: any): Promise<any> {    
-    const schema = Joi.object({ name: todoSchemaMap.name })
-      .fork(['name'], (schema) => schema.required());
+    const schema = Joi.object({ name: todoSchemaMap.name, checked: todoSchemaMap.checked })
+      .min(1) // at least one is required
+
     data = this.validate(schema, data);
     todoId = this.validate(todoSchemaMap.id, todoId);
 

@@ -5,14 +5,12 @@ export default class InMemoryTodoRepository implements ITodoRepository {
   private todosList: Array<any> = [];
   private todosIdIndex: object = {};
   private sequence: number = 1;
-  private editableProperties = ['name'];
+  private editableProperties = ['name', 'checked'];
   private sortableProperties = ['name', 'created_at', 'updated_at', 'checked']
 
   constructor() {
-    for (let i = 0; i < 1; i++) {
-      const exampleTodo = { name: 'Example TODO ' + i };
-      this.createTodo(exampleTodo);
-    }
+    const exampleTodo = { name: 'Example TODO' };
+    this.createTodo(exampleTodo);
   }
 
   private indexNewTodoItem(item: any) {
@@ -44,18 +42,25 @@ export default class InMemoryTodoRepository implements ITodoRepository {
       }
 
       const results = [...this.todosList].sort(function (a, b) {
-        let valueA = typeof a[paginationParams.sort] === 'boolean' 
-          ? a[paginationParams.sort].toString() 
-          : a[paginationParams.sort];
+        let valueA = a[paginationParams.sort] || null;
+        let valueB = b[paginationParams.sort] || null;
 
-        let valueB = typeof b[paginationParams.sort] === 'boolean' 
-          ? b[paginationParams.sort].toString() 
-          : b[paginationParams.sort];
-  
-        if(order === 'asc') {
-          return valueA > valueB ? 1: -1;
+        if(valueA === valueB) {
+          return 0;
+        }
+
+        if(valueA === null) {
+          return order === 'asc' ? 1 : -1;
+        }
+
+        if(valueB === null) {
+          return order === 'asc' ? -1 : 1;
+        }
+
+        if (order === 'asc') {
+          return valueA > valueB ? 1 : -1;
         } else {
-          return valueA < valueB ? 1: -1;
+          return valueA < valueB ? 1 : -1;
         }
       });
 
@@ -94,13 +99,18 @@ export default class InMemoryTodoRepository implements ITodoRepository {
     }
 
     const dataKeys = Object.keys(data);
+    const update: any = {};
+
     dataKeys.forEach(key => {
       if (this.editableProperties.indexOf(key) !== -1) {
-        todo[key] = data[key];
+        update[key] = data[key];
       }
     });
 
-    todo.updated_at = new Date();
+    if(Object.keys(update).length > 0) {
+      update.updated_at = new Date();
+      Object.assign(todo, update);
+    }
   }
 
   async deleteTodo(todoId: number): Promise<any> {
