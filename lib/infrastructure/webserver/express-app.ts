@@ -14,10 +14,16 @@ import error404Manager from './utils/404ErrorManager';
 function getApp(appContext: AppContext) {
   const app = express();
 
+  const defaultDirectives  = helmet.contentSecurityPolicy.getDefaultDirectives();
+  delete defaultDirectives['upgrade-insecure-requests'];
+
   /** Global Middlewares */
   app.use(
     helmet({
       frameguard: { action: 'deny' },
+      contentSecurityPolicy: {
+        directives: defaultDirectives
+      }
     }),
   );
 
