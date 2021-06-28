@@ -7,6 +7,7 @@ export default class InMemoryTodoRepository implements ITodoRepository {
   private sequence: number = 1;
   private editableProperties = ['name', 'checked'];
   private sortableProperties = ['name', 'created_at', 'updated_at', 'checked']
+  private pageSize = 10;
 
   constructor() {
     const exampleTodo = { name: 'Example TODO' };
@@ -41,7 +42,7 @@ export default class InMemoryTodoRepository implements ITodoRepository {
         throw error;
       }
 
-      const results = [...this.todosList].sort(function (a, b) {
+      const sortedResults = [...this.todosList].sort(function (a, b) {
         let valueA = a[paginationParams.sort] || null;
         let valueB = b[paginationParams.sort] || null;
 
@@ -50,11 +51,11 @@ export default class InMemoryTodoRepository implements ITodoRepository {
         }
 
         if(valueA === null) {
-          return order === 'asc' ? 1 : -1;
+          return order === 'asc' ? -1 : 1;
         }
 
         if(valueB === null) {
-          return order === 'asc' ? -1 : 1;
+          return order === 'asc' ? 1 : -1;
         }
 
         if (order === 'asc') {
@@ -64,15 +65,27 @@ export default class InMemoryTodoRepository implements ITodoRepository {
         }
       });
 
-      const from = (Number(paginationParams.page) - 1) * 10;
-      return results.slice().slice(from, from + 10);;
+      const from = (Number(paginationParams.page) - 1) * this.pageSize;
+      const finalResults = sortedResults.slice().slice(from, from + this.pageSize);
+
+      return {
+        data: finalResults,
+        totalPages: Math.ceil(this.todosList.length / this.pageSize),
+        currentPage: paginationParams.page
+      };
 
     } else {
-      const from = (Number(paginationParams.page) - 1) * 10;
-      const idIndexKeys = Object.keys(this.todosIdIndex).slice(from, from + 10);
-      return idIndexKeys.map((key) => {
+      const from = (Number(paginationParams.page) - 1) * this.pageSize;
+      const idIndexKeys = Object.keys(this.todosIdIndex).slice(from, from + this.pageSize);
+      const results = idIndexKeys.map((key) => {
         return this.todosIdIndex[key];
       });
+
+      return {
+        data: results,
+        totalPages: Math.ceil(this.todosList.length / this.pageSize),
+        currentPage: paginationParams.page
+      };
     }
   }
 

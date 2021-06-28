@@ -57,8 +57,8 @@ describe('TODO use cases', function () {
       expect(editTodoStub.callCount).to.be.eq(0);
     });
 
-    it('should fail if data.name length is less than 5', async function () {
-      const promise = todoUseCases.editTodo(1, { name: '1234' });
+    it('should fail if data.name length is less than 1', async function () {
+      const promise = todoUseCases.editTodo(1, { name: '' });
       await expect(promise).to.be.rejected;
       expect(editTodoStub.callCount).to.be.eq(0);
     });
@@ -150,8 +150,8 @@ describe('TODO use cases', function () {
       expect(createTodoStub.callCount).to.be.eq(0);
     });
 
-    it('should fail if data.name length is less than 5', async function () {
-      const promise = todoUseCases.createTodo({ name: '1234' });
+    it('should fail if data.name length is less than 1', async function () {
+      const promise = todoUseCases.createTodo({ name: '' });
       await expect(promise).to.be.rejected;
       expect(createTodoStub.callCount).to.be.eq(0);
     });

@@ -6,14 +6,16 @@ chai.use(chaiAsPromise);
 
 import InMemoryTodosRepository from './InMemoryTodoRepository';
 
+const PAGE_SIZE = 10;
+
 describe('InMemoryTodoRepository', function () {
   describe('Instance 1', function () {
     let inMemoryTodosRepository = new InMemoryTodosRepository();
 
     describe('getTodos', function () {
       it('should return todos list with default item(s)', async function () {
-        const todos = await inMemoryTodosRepository.getTodos({ page: 1 });
-
+        const result = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const todos = result.data;
         expect(todos).to.have.lengthOf(1);
         expect(todos[0]).to.be.an('object');
         expect(todos[0]).to.have.keys('name', 'id', 'created_at', 'updated_at', 'checked');
@@ -26,8 +28,9 @@ describe('InMemoryTodoRepository', function () {
       it('should add new item to todo-list', async function () {
         const newTodo = { name: 'Study for English exam' };
         await inMemoryTodosRepository.createTodo(newTodo);
-
-        const todos = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const result = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const todos = result.data;
+        
         expect(todos).to.have.lengthOf(2);
 
         expect(todos[0]).to.be.an('object');
@@ -44,35 +47,40 @@ describe('InMemoryTodoRepository', function () {
 
     describe('editTodo', function () {
       it('should edit an existing todo item', async function () {
-        const result = await inMemoryTodosRepository.editTodo(2, { name: 'Study for math exam' });
-        const todos = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const resultEdit = await inMemoryTodosRepository.editTodo(2, { name: 'Study for math exam' });
+        const resultGet = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const todos = resultGet.data;
 
-        expect(result).to.be.undefined;
+        expect(resultEdit).to.be.undefined;
         expect(todos[1].name).to.be.eql('Study for math exam');
       });
 
       it('should mark todo as checked', async function () {
         // schema validations are made in use case
         // repositories will trust use cases validation
-        const result = await inMemoryTodosRepository.editTodo(2, { checked: true });
-        const todos = await inMemoryTodosRepository.getTodos({ page: 1 });
-
-        expect(result).to.be.undefined;
+        const resultEdit = await inMemoryTodosRepository.editTodo(2, { checked: true });
+        const resultGet = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const todos = resultGet.data;
+        expect(resultEdit).to.be.undefined;
         expect(todos[1].checked).to.be.eql(true);
       });
 
       it('should not update not allowed properties', async function () {
         // only name and checked properties are allowed
-        const prevTodos = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const prevTodosResult = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const prevTodos = prevTodosResult.data;
+
         // creating copy of object to break reference
         const beforeUpdateItem = { ...prevTodos.find(todo => todo.id === 2) };
 
-        const result = await inMemoryTodosRepository.editTodo(2, { not_allowed: 'not_allowed' });
+        const resultEdit = await inMemoryTodosRepository.editTodo(2, { not_allowed: 'not_allowed' });
 
-        const afterTodos = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const afterTodosResult = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const afterTodos = afterTodosResult.data;
+
         const afterUpdateItem = afterTodos.find(todo => todo.id === 2);
 
-        expect(result).to.be.undefined;
+        expect(resultEdit).to.be.undefined;
         expect(beforeUpdateItem).to.be.eql(afterUpdateItem);
       });
 
@@ -89,10 +97,11 @@ describe('InMemoryTodoRepository', function () {
 
     describe('deleteTodo', function () {
       it('should delele an existing todo item', async function () {
-        const result = await inMemoryTodosRepository.deleteTodo(1);
-        const todos = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const resultDeleteOp = await inMemoryTodosRepository.deleteTodo(1);
+        const resultGetTodos = await inMemoryTodosRepository.getTodos({ page: 1 });
+        const todos = resultGetTodos.data;
 
-        expect(result).to.be.undefined;
+        expect(resultDeleteOp).to.be.undefined;
         expect(todos).to.have.lengthOf(1);
         expect(todos[0].id).to.be.eql(2);
         expect(todos[0].name).to.be.eql('Study for math exam');
@@ -134,11 +143,14 @@ describe('InMemoryTodoRepository', function () {
       // page 9 does not exist, it should return empty array
       [1, 3, 5, 8, 9].forEach(pageNumber => {
         it(`should return page number ${pageNumber} `, async function () {
-          const todos = await inMemoryTodosRepository.getTodos({ page: pageNumber });
-          const from = (pageNumber - 1) * 10;
-          const fakePage = fakeTodos.slice(from, from + 10);
+          const result = await inMemoryTodosRepository.getTodos({ page: pageNumber });
+          const todos = result.data;
+          const from = (pageNumber - 1) * PAGE_SIZE;
+          const fakePage = fakeTodos.slice(from, from + PAGE_SIZE);
 
           expect(todos).to.have.lengthOf(fakePage.length);
+          expect(result.currentPage).to.be.equal(pageNumber);
+          expect(result.totalPages).to.be.equal(8);
 
           fakePage.forEach((item, index) => {
             // TODO: Find other way to do this
@@ -182,9 +194,10 @@ describe('InMemoryTodoRepository', function () {
 
           [1, 3, 5, 8, 9].forEach(pageNumber => {
             it(`should return page ${pageNumber} sorting by ${conf.prop}`, async function () {
-              const todos = await inMemoryTodosRepository.getTodos({ page: pageNumber, sort: conf.prop });
-              const from = (pageNumber - 1) * 10;
-              const fakePage = fakeSortedTodos.slice(from, from + 10);
+              const result = await inMemoryTodosRepository.getTodos({ page: pageNumber, sort: conf.prop });
+              const todos = result.data;
+              const from = (pageNumber - 1) * PAGE_SIZE;
+              const fakePage = fakeSortedTodos.slice(from, from + PAGE_SIZE);
 
               expect(todos).to.have.lengthOf(fakePage.length);
               
@@ -202,7 +215,7 @@ describe('InMemoryTodoRepository', function () {
       //     let pointer = 0;
       //     const todos = await inMemoryTodosRepository.getTodos({ page: 1, sort: 'name' });
 
-      //     expect(todos).to.have.lengthOf(10);
+      //     expect(todos).to.have.lengthOf(PAGE_SIZE);
       //     expect(todos).to.be.an('array');
 
       //     expect(todos[0]).to.be.eql(fakeTodos[0]); 

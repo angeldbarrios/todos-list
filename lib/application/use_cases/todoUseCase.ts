@@ -4,13 +4,13 @@ import Joi from 'joi';
 
 const todoSchemaMap = {
   id: Joi.number(),
-  name: Joi.string().min(5).max(100), // TODO: Keep an eye on XSS
+  name: Joi.string().min(1).max(100), // TODO: Keep an eye on XSS
   checked: Joi.boolean()
 };
 
 const paginationSchema = Joi.object({
   page: Joi.number().default(1),
-  sort: Joi.string().max(20).regex(/^[A-Za-z0-9-]+$/)
+  sort: Joi.string().max(20).regex(/^[A-Za-z0-9-_]+$/)
 });
 
 export default class TodoUseCases {

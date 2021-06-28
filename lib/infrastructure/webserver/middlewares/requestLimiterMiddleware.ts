@@ -4,7 +4,7 @@ import logger from '../logger';
 
 export default () => {
   const opts = {
-    points: 30, // Number of points
+    points: 100, // Number of points
     duration: 1, // Per second(s)
     blockDuration: 60,
   };
