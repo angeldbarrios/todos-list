@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --build",
     "dev": "nodemon",
-    "start": "nodemon",
+    "start": "ts-node  --transpile-only ./index.ts",
     "test": "mocha -r ts-node/register lib/**/*.spec.ts",
     "lint": "eslint . --ext .ts || true",
     "lint:fix": "eslint . --ext .ts --fix || true",
