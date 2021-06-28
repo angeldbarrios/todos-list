@@ -21,7 +21,7 @@
     "hpp": "^0.2.3",
     "joi": "^17.4.0",
     "rate-limiter-flexible": "^2.2.2",
-    "reflect-metadata": "^0.1.13",    
+    "reflect-metadata": "^0.1.13",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5"
   },
