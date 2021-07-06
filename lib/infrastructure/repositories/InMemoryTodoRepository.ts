@@ -42,6 +42,14 @@ export default class InMemoryTodoRepository implements ITodoRepository {
         throw error;
       }
 
+      let A_IS_BEFORE = -1;
+      let B_IS_BEFORE = 1;
+
+      if(order == 'desc') {
+        A_IS_BEFORE = 1;
+        B_IS_BEFORE = -1;
+      }
+
       const sortedResults = [...this.todosList].sort(function (a, b) {
         let valueA = a[paginationParams.sort] || null;
         let valueB = b[paginationParams.sort] || null;
@@ -51,18 +59,19 @@ export default class InMemoryTodoRepository implements ITodoRepository {
         }
 
         if(valueA === null) {
-          return order === 'asc' ? -1 : 1;
+          return A_IS_BEFORE;
         }
 
         if(valueB === null) {
-          return order === 'asc' ? 1 : -1;
+          return B_IS_BEFORE;
         }
-
-        if (order === 'asc') {
-          return valueA > valueB ? 1 : -1;
-        } else {
-          return valueA < valueB ? 1 : -1;
-        }
+        
+        // TODO: find a better naming for this
+        return (
+          valueA > valueB 
+            ? B_IS_BEFORE
+            : A_IS_BEFORE 
+        );
       });
 
       const from = (Number(paginationParams.page) - 1) * this.pageSize;
